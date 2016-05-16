@@ -1,6 +1,6 @@
 # -*- mode: python -*-
 a = Analysis(['lectio.py'],
-             pathex=['C:\\Users\\mich087q\\Desktop\\lectio-app2'],
+             datas = [('cacert.pem', '.')],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
@@ -8,7 +8,7 @@ pyz = PYZ(a.pure)
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
-          name='lectio.exe',
+          name='lectio-dl.exe',
           debug=False,
           strip=None,
           upx=True,
@@ -16,7 +16,7 @@ exe = EXE(pyz,
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
-               a.datas + [('cacert.pem', 'C:\\Users\\mich087q\\Desktop\\lectio-app2\\cacert.pem', 'DATA')],
+               a.datas,
                strip=None,
                upx=True,
-               name='lectio')
+               name='lectio-dl')

@@ -526,19 +526,24 @@ r = requests.get('https://www.lectio.dk/lectio/91/DokumentOversigt.aspx?laererid
                  cookies = cookies, verify = cafile)
 root = Node('Root', '', True)
 
+t1 = time.time()
 readRecursively(cookies, r.content, tid, root, BASEDIR, 'newdocs')
+t2 = time.time()
 
-root.print_rec("{0} {1:38} : {2:2} : {3}")
+minutter = int((t2-t1)/60) # Udregn den brugte tid i minutter
 
 # Udskriv afsluttende statistik
 
-print "Tillykke!"
+print
+print "Færdig!"
 print "Du har nu hentet i alle dine dokumenter ned fra lectio."
-print "De ligger i mappen '"+BASEDIR+"'."
+print "De ligger alle i mappen '"+BASEDIR+"'."
 print 
 print "Lidt statistik:"
-print "Du har hentet i alt", sumFiles, "filer"
-print "Fordelt på i alt", sumDirs, "mapper"
-print "Tilsammen i alt", sumBytes, "bytes"
+print "Du har hentet i alt:", repr(sumFiles).rjust(4), "filer"
+print "Fordelt på i alt:   ", repr(sumDirs).rjust(4), "mapper"
+print "Tilsammen fylder de:", repr(sumBytes/1024/1024).rjust(4), "MB"
+print "Tid brugt i alt:    ", repr(minutter).rjust(4), "minutter"
 print
 print "Slut!"
+

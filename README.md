@@ -19,3 +19,5 @@ Filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver p.t
 # Tid
 Det kan godt tage op imod en time at hente alle sine dokumenter ned, afhængig af antal og størrelse.
 
+# Tekniske detaljer
+Når man henter en side fra lectio, så giver det et forskelligt resultat om man bruger en almindelig browser (Chrome, m.m.) eller om man bruger dette python script. Det har givet en del grå hår i hovedet...
