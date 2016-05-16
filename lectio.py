@@ -377,7 +377,7 @@ def convertToDict(s):
 # "fname" is the name of the expanded folder, if any.
 # If set, only descend recursively through folders below this one.
 def readRecursively(cookies, page, tid, node, path, readFrom=""):
-    logging.info("readRecursively, dir_name=%d", node.dir_name)
+    logging.info("readRecursively, dir_name=%s", node.dir_name)
     post_vars = getHiddenValues(page)
     if readFrom:
         fpage = page.split(readFrom)
