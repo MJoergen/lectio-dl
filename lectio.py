@@ -328,7 +328,7 @@ def readFiles(page, cookies, dir_name):
     id = page.split('documentid=')
     for i in range(1,len(id)):
         docid = id[i].split('"')[0]
-        filnavn = id[i].split('&nbsp;')[1].split('</a>')[0]
+        filnavn = id[i].split('&nbsp;')[1].split('</a>')[0].decode('cp850', 'ignore')
         fname = convert(dir_name + "/" + filnavn)
         logging.info(u"Læser dokument ID %s til %s", docid, fname)
         print u"Læser document ID", docid, "til", fname
