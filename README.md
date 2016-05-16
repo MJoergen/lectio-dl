@@ -13,6 +13,9 @@ Kør programmet. Den spørger efter skolenavn, brugernavn og kodeord.
 # Sikkerhed
 Dette program gør kun som beskrevet. Men hvis sikkerhed betyder meget, så bør man sørge for at ændre sit lectio-kodeord før og efter at have brugt dette program.
 
+# Systemkrav
+Denne version af programmet kræver, at Python 2.7 er installeret, samt modulet "requests"
+
 # Mangler
 * Filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver p.t. ikke taget med.
 * Dokumenterne bliver gemt med dags dato. Programmet benytter ikke lectio's datoer for dokumenterne.
