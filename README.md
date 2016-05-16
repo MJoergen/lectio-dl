@@ -14,7 +14,8 @@ Kør programmet. Den spørger efter skolenavn, brugernavn og kodeord.
 Dette program gør kun som beskrevet. Men hvis sikkerhed betyder meget, så bør man sørge for at ændre sit lectio-kodeord før og efter at have brugt dette program.
 
 # Mangler
-Filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver p.t. ikke taget med.
+* Filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver p.t. ikke taget med.
+* Dokumenterne bliver gemt med dags dato. Programmet benytter ikke lectio's datoer for dokumenterne.
 
 # Tid
 Det kan godt tage op imod en time at hente alle sine dokumenter ned, afhængig af antal og størrelse.
