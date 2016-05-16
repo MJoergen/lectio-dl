@@ -2,16 +2,21 @@
 # -*- coding: utf-8 -*-
 import requests
 import os
-import sys
 import time
 import getpass
 import difflib
+import logging
 
 # Initialize global variables
+BASEDIR  = "Lectio-Doc" # Mappe, hvor alle de hentede dokumenter bliver lagt.
 cafile   = 'cacert.pem' # Bruges til at etablere en HTTPS (SSL) forbindelse til lectio.
-BASEDIR  = "Dokumenter" # Mappe, hvor alle de hentede dokumenter bliver lagt.
 
-# Denne liste er taget fra adressen http://www.lectio.dk/lectio/login_list.aspx den 15. maj 2016
+# Global counters. Used only for statistics
+sumFiles = 0
+sumBytes = 0 
+sumDirs  = 0
+
+# Denne liste er taget fra adressen http://www.lectio.dk/lectio/login_list.aspx, den 15. maj 2016
 skoler_liste = [
     [1,   'Aurehøj Gymnasium'],
     [2,   'Hvidovre Gymnasium og HF'],
@@ -315,19 +320,26 @@ def isChildInTree(child, node):
 
 # This parses a page and reads the files. No recursion!
 def readFiles(page, cookies, dir_name):
+    global sumFiles
+    global sumBytes 
+    global sumDirs
     os.makedirs(dir_name)
     # Parse list
     id = page.split('documentid=')
     for i in range(1,len(id)):
         docid = id[i].split('"')[0]
         filnavn = id[i].split('&nbsp;')[1].split('</a>')[0]
-        fname = dir_name + "/" + filnavn
-        print "Reading document ID", docid, " to ", fname
+        fname = convert(dir_name + "/" + filnavn)
+        logging.info("Læser dokument ID %s til %s", docid, fname)
+        print "Læser document ID", docid, "til", fname
         r = requests.get('https://www.lectio.dk/lectio/91/dokumenthent.aspx?documentid='+docid, \
                          cookies = cookies, verify = cafile)
         f = open(fname, "wb") # On windows, we must use binary mode.
         f.write(r.content)
         time.sleep(0.1) # Avoid stressing the servers at lectio.
+        sumFiles += 1
+        sumBytes += len(r.content)
+    sumDirs += 1
 
 
 # This reads the hidden form values from lines like:
@@ -365,22 +377,26 @@ def convertToDict(s):
 # "fname" is the name of the expanded folder, if any.
 # If set, only descend recursively through folders below this one.
 def readRecursively(cookies, page, tid, node, path, readFrom=""):
+    logging.info("readRecursively, dir_name=%d", node.dir_name)
     post_vars = getHiddenValues(page)
     if readFrom:
         fpage = page.split(readFrom)
         if len(fpage) < 2:
-            print "======"
-            print readFrom
-            print "------"
-            print len(fpage)
-            print "------"
-            print page
-            print "======"
-        assert len(fpage) >= 2
+            print "Der opstod en fejl, se i filen log.txt"
+            logging.error("readFrom: ======")
+            logging.error(readFrom)
+            logging.error("------")
+            logging.error("len(fpage) = %s", len(fpage))
+            logging.error("------")
+            logging.error("page: -----")
+            logging.error(page)
+            logging.error("======")
+            print "Vi stopper nu."
+            os._exit(1)
         page = fpage[-1]
 
     id = page.split('lectio/img')
-    print len(id)
+    logging.info("len(id)=%s", len(id))
     for i in range(1,len(id)):
         fdir = id[i].split("TREECLICKED")
         if len(fdir) > 1:
@@ -389,16 +405,16 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
             expand = "Expand" in id[i-1]
             child = Node(dir_name, dir_id, expand)
             if isChildInTree(child, root) and i == 1:
-                print "Skip"
+                logging.info("Skipping %s", dir_name)
                 continue
             if isChildInTree(child, root) and i != 1:
-                print "Return. Found", dir_name
+                logging.info("Returning, found %s", dir_name)
                 break
-            print "SEARCH {0:38} : {1:2} : {2}".format(dir_id, expand, dir_name)
+            logging.info("Adding node {0:38} : {1:2} : {2}".format(dir_id, expand, dir_name))
             node.append(child)
 
     # Loop through all children of node
-    print len(node.children)
+    logging.info("len(node.children)=%s", len(node.children))
     for child in node.children:
         post_vars.update({"__EVENTTARGET": "__Page", "__EVENTARGUMENT": child.dir_id})
         r = requests.post('https://www.lectio.dk/lectio/91/DokumentOversigt.aspx?laererid='+tid,
@@ -408,7 +424,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
         if len(fname) > 1:
             fullname = fname[-1].split("\n")[0]
         newpath = convert(path + "/" + fullname)
-        print "  READ {0:38} : {1:2} : {2}".format(child.dir_id, child.dir_sub, newpath)
+        logging.info("Reading files from {0:38} : {1:2} : {2}".format(child.dir_id, child.dir_sub, newpath))
         readFiles(r.content, cookies, newpath)
         if child.dir_sub:
             readFrom = '"Collapse ' + child.dir_name.replace('&', '&amp;') + '"'
@@ -417,10 +433,19 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
 
 ########################################################################################################
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s', filename='log.txt')
+
 print "Velkommen!"
-print "Dette lille program vil hente alle dine dokumenter fra lectio og gemme på din computer."
+print "Dette lille program vil hente alle dine dokumenter fra lectio og gemme på din computer mappen '"+BASEDIR+"'."
 print "P.t. bliver opgaver og lectier ikke gemt. Kun det som findes under Dokumenter bliver gemt."
 print
+
+if os.path.isdir(BASEDIR):
+    print "Fejl!"
+    print "Der findes allerede en mappe med navnet '"+BASEDIR+"'"
+    print "Du skal først fjerne eller omdøbe denne mappe, og så genstarte dette program"
+    os._exit(1)
+
 print "Du skal først skrive navnet på din skole og verificere dette. Dernæst vil programmet"
 print "bede om dit brugernavn og dit kodeord til lectio. Hvis du vil, så kan du gå ind på "
 print "lectio og ændre dit kodeord til en ny midlertidig kode."
@@ -459,6 +484,7 @@ print
 teacher  = raw_input("Lectio brugernavn: ").rstrip()
 password = getpass.getpass("Lectio kodeord: ")
 
+print
 print "Ok. Jeg prøver nu at logge ind som " + teacher + " med det angivne brugernavn"
 
 # Get session data
@@ -487,6 +513,9 @@ if len(ftid) == 1:
 
 tid = r.content.split('laererid=',1)[1].split('"')[0]
 print "Jeg er nu logget ind på lectio som " + teacher + "."
+print
+
+logging.info("Logget på %s med brugernavn %s", skole_korr, teacher)
 
 # Convert session cookie to a dictionary
 c = r.request.headers['Cookie']
@@ -501,3 +530,15 @@ readRecursively(cookies, r.content, tid, root, BASEDIR, 'newdocs')
 
 root.print_rec("{0} {1:38} : {2:2} : {3}")
 
+# Udskriv afsluttende statistik
+
+print "Tillykke!"
+print "Du har nu hentet i alle dine dokumenter ned fra lectio."
+print "De ligger i mappen '"+BASEDIR+"'."
+print 
+print "Lidt statistik:"
+print "Du har hentet i alt", sumFiles, "filer"
+print "Fordelt på i alt", sumDirs, "mapper"
+print "Tilsammen i alt", sumBytes, "bytes"
+print
+print "Slut!"
