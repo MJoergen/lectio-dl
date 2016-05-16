@@ -323,6 +323,7 @@ def readFiles(page, cookies, dir_name):
     global sumFiles
     global sumBytes 
     global sumDirs
+    global lectio_nummer
     os.makedirs(dir_name)
     # Parse list
     id = page.split('documentid=')
@@ -332,7 +333,7 @@ def readFiles(page, cookies, dir_name):
         fname = convert(dir_name + "/" + filnavn)
         logging.info(u"Læser dokument ID %s til %s", docid, fname)
         print u"Læser document ID", docid, "til", fname
-        r = requests.get('https://www.lectio.dk/lectio/91/dokumenthent.aspx?documentid='+docid, \
+        r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/dokumenthent.aspx?documentid='+docid, \
                          cookies = cookies, verify = cafile)
         f = open(fname, "wb") # On windows, we must use binary mode.
         f.write(r.content)
@@ -377,6 +378,7 @@ def convertToDict(s):
 # "fname" is the name of the expanded folder, if any.
 # If set, only descend recursively through folders below this one.
 def readRecursively(cookies, page, tid, node, path, readFrom=""):
+    global lectio_nummer
     logging.info("readRecursively, dir_name=%s", node.dir_name)
     post_vars = getHiddenValues(page)
     if readFrom:
@@ -417,7 +419,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
     logging.info("len(node.children)=%s", len(node.children))
     for child in node.children:
         post_vars.update({"__EVENTTARGET": "__Page", "__EVENTARGUMENT": child.dir_id})
-        r = requests.post('https://www.lectio.dk/lectio/91/DokumentOversigt.aspx?laererid='+tid,
+        r = requests.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid,
                 cookies = cookies, data = post_vars, verify = cafile)
         fullname = child.dir_name
         fname = r.content.split('FolderCommentsLabel">Mappenavn: ')
@@ -491,7 +493,7 @@ print u"Ok. Jeg prøver nu at logge ind som " + teacher + " med det angivne brug
 
 # Get session data
 s = requests.Session()
-r = s.get('https://www.lectio.dk/lectio/91/login.aspx', verify = cafile)
+r = s.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/login.aspx', verify = cafile)
 session = getHiddenValues(r.content)
 
 # Login
@@ -524,7 +526,7 @@ c = r.request.headers['Cookie']
 cookies = convertToDict(c)
 
 # Get list of documents
-r = requests.get('https://www.lectio.dk/lectio/91/DokumentOversigt.aspx?laererid='+tid, \
+r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid, \
                  cookies = cookies, verify = cafile)
 root = Node('Root', '', True)
 
