@@ -421,10 +421,10 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
         post_vars.update({"__EVENTTARGET": "__Page", "__EVENTARGUMENT": child.dir_id})
         r = requests.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid,
                 cookies = cookies, data = post_vars, verify = cafile)
-        fullname = child.dir_name
-        fname = r.content.split('FolderCommentsLabel">Mappenavn: ').decode('cp850', 'ignore')
+        fullname = child.dir_name.decode('cp850', 'ignore')
+        fname = r.content.split('FolderCommentsLabel">Mappenavn: ')
         if len(fname) > 1:
-            fullname = fname[-1].split("\n")[0]
+            fullname = fname[-1].split("\n")[0].decode('cp850', 'ignore')
         newpath = convert(path + "/" + fullname)
         logging.info("Reading files from {0:38} : {1:2} : {2}".format(child.dir_id, child.dir_sub, newpath))
         readFiles(r.content, cookies, newpath)
