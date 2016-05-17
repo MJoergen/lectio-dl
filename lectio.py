@@ -403,7 +403,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
         fdir = id[i].split("TREECLICKED")
         if len(fdir) > 1:
             dir_id = "TREECLICKED" + fdir[1].split('&')[0]
-            dir_name = fdir[1].split('">')[1].split('<')[0]
+            dir_name = fdir[1].split('">')[1].split('<')[0].decode('cp850', 'ignore')
             expand = "Expand" in id[i-1]
             child = Node(dir_name, dir_id, expand)
             if isChildInTree(child, root) and i == 1:
