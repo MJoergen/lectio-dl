@@ -422,7 +422,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
         r = requests.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid,
                 cookies = cookies, data = post_vars, verify = cafile)
         fullname = child.dir_name
-        fname = r.content.split('FolderCommentsLabel">Mappenavn: ')
+        fname = r.content.split('FolderCommentsLabel">Mappenavn: ').decode('cp850', 'ignore')
         if len(fname) > 1:
             fullname = fname[-1].split("\n")[0]
         newpath = convert(path + "/" + fullname)
