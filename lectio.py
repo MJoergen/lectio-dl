@@ -6,6 +6,8 @@ import time
 import getpass
 import difflib
 import logging
+from dateutil import parser
+from dateutil import relativedelta
 
 # Initialize global variables
 BASEDIR  = "Lectio-Doc" # Mappe, hvor alle de hentede dokumenter bliver lagt.
@@ -376,6 +378,18 @@ def readFiles(page, cookies, dir_name):
             continue # Give up and skip this file.
 
         # Get file name from headers, because the name in the HTML file may be truncated.
+        date_str = id[i].split('noWrap">')[2].split('</')[0]
+        date_str = date_str.replace(u'ma', u'Mon')
+        date_str = date_str.replace(u'ti', u'Tue')
+        date_str = date_str.replace(u'on', u'Wed')
+        date_str = date_str.replace(u'to', u'Thu')
+        date_str = date_str.replace(u'fr', u'Fri')
+        date_str = date_str.replace(u'lø', u'Sat')
+        date_str = date_str.replace(u'sø', u'Sun')
+        date = parser.parse(date_str, dayfirst=True)
+        if not date_str[0].isdigit():
+            date = date + relativedelta.relativedelta(weeks=-1)
+        date_int = time.mktime(date.timetuple())
         s = r.headers['Content-Disposition'].split("UTF-8''")[-1].decode(errors='ignore')
         s = convert(s)
 
@@ -385,6 +399,8 @@ def readFiles(page, cookies, dir_name):
         
         f = open(fname, "wb") # On windows, we must use binary mode.
         f.write(r.content)
+        f.close()
+        os.utime(fname, (date_int, date_int))
         time.sleep(0.1) # Avoid stressing the servers at lectio.
         sumFiles += 1
         sumBytes += len(r.content)
@@ -474,7 +490,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
             print u"FEJL: Kunne ikke læse mappen " + child.dir_id
             continue # Give up and skip this folder.
         
-        content = r.content.decode(errors = 'ignore') # Convert to unicode
+        content = r.content.decode(encoding='utf-8', errors = 'ignore') # Convert to unicode
         fullname = child.dir_name
         fname = content.split('FolderCommentsLabel">Mappenavn: ')
         if len(fname) > 1:
