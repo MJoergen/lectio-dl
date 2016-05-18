@@ -284,6 +284,32 @@ def convert(s):
     s = s.replace('&#197;', u"Å")
     s = s.replace('&#233;', u"é")
     s = s.replace('&#180;', u"i")
+    s = s.replace('%20', u" ")
+    s = s.replace('%21', u"!")
+    s = s.replace('%22', u'"')
+    s = s.replace('%23', u"#")
+    s = s.replace('%24', u"$")
+    s = s.replace('%25', u"%")
+    s = s.replace('%26', u"&")
+    s = s.replace('%27', u"'")
+    s = s.replace('%28', u"(")
+    s = s.replace('%29', u")")
+    s = s.replace('%2A', u"*")
+    s = s.replace('%2B', u"+")
+    s = s.replace('%2C', u",")
+    s = s.replace('%2D', u"-")
+    s = s.replace('%2E', u".")
+    s = s.replace('%2F', u"/")
+    s = s.replace('%5B', u"[")
+    s = s.replace('%5D', u"]")
+    s = s.replace('%5E', u"^")
+    s = s.replace('%C3%86', u"Æ")
+    s = s.replace('%C3%98', u"Ø")
+    s = s.replace('%C3%85', u"Å")
+    s = s.replace('%C3%A6', u"æ")
+    s = s.replace('%C3%B8', u"ø")
+    s = s.replace('%C3%A5', u"å")
+    s = s.replace('%E2%80%93', u"-")
     return s
 
 
@@ -324,17 +350,39 @@ def readFiles(page, cookies, dir_name):
     global sumBytes 
     global sumDirs
     global lectio_nummer
+    
     os.makedirs(dir_name)
+    
     # Parse list
     id = page.split('documentid=')
     for i in range(1,len(id)):
-        docid = id[i].split('"')[0]
-        filnavn = id[i].split('&nbsp;')[1].split('</a>')[0].decode('cp850', 'ignore')
-        fname = convert(dir_name + "/" + filnavn)
+        docid = id[i].split('"')[0]  # Get document ID
+		
+		# Read entire file, try a few times in case of errors.
+        attempts = 3
+        while attempts > 0:
+            r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/dokumenthent.aspx?documentid='+docid, \
+			    cookies = cookies, verify = cafile)
+
+            if r.status_code == 200:  # Success!
+                break
+            time.sleep(5) # Wait 5 seconds before trying again.
+            attempts -= 1
+        
+        else: # We give up. Too many errors.
+            filnavn = id[i].split('&nbsp;')[1].split('</a>')[0]
+            logging.info(u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn)
+            print u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn
+            continue # Give up and skip this file.
+
+        # Get file name from headers, because the name in the HTML file may be truncated.
+        s = r.headers['Content-Disposition'].split("UTF-8''")[-1].decode(errors='ignore')
+        s = convert(s)
+
+        fname = convert(dir_name + "/" + s)
         logging.info(u"Læser dokument ID %s til %s", docid, fname)
         print u"Læser document ID", docid, "til", fname
-        r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/dokumenthent.aspx?documentid='+docid, \
-                         cookies = cookies, verify = cafile)
+        
         f = open(fname, "wb") # On windows, we must use binary mode.
         f.write(r.content)
         time.sleep(0.1) # Avoid stressing the servers at lectio.
@@ -379,23 +427,12 @@ def convertToDict(s):
 # If set, only descend recursively through folders below this one.
 def readRecursively(cookies, page, tid, node, path, readFrom=""):
     global lectio_nummer
-    logging.info("readRecursively, dir_name=%s", node.dir_name)
+    
+    logging.info(u"readRecursively, dir_name=%s", node.dir_name)
     post_vars = getHiddenValues(page)
-    if readFrom:
-        fpage = page.split(readFrom)
-        if len(fpage) < 2:
-            print "Der opstod en fejl, se i filen log.txt"
-            logging.error("readFrom: ======")
-            logging.error(readFrom)
-            logging.error("------")
-            logging.error("len(fpage) = %s", len(fpage))
-            logging.error("------")
-            logging.error("page: -----")
-            logging.error(page)
-            logging.error("======")
-            print "Vi stopper nu."
-            os._exit(1)
-        page = fpage[-1]
+    
+    if readFrom:  # Skip directories already processed
+        page = page.split(readFrom)[-1]
 
     id = page.split('lectio/img')
     logging.info("len(id)=%s", len(id))
@@ -403,7 +440,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
         fdir = id[i].split("TREECLICKED")
         if len(fdir) > 1:
             dir_id = "TREECLICKED" + fdir[1].split('&')[0]
-            dir_name = fdir[1].split('">')[1].split('<')[0].decode('cp850', 'ignore')
+            dir_name = fdir[1].split('">')[1].split('<')[0]
             expand = "Expand" in id[i-1]
             child = Node(dir_name, dir_id, expand)
             if isChildInTree(child, root) and i == 1:
@@ -412,25 +449,44 @@ def readRecursively(cookies, page, tid, node, path, readFrom=""):
             if isChildInTree(child, root) and i != 1:
                 logging.info("Returning, found %s", dir_name)
                 break
-            logging.info("Adding node {0:38} : {1:2} : {2}".format(dir_id, expand, dir_name))
+            logging.info(u"Adding node {0:38} : {1:2} : {2}".format(dir_id, expand, dir_name))
             node.append(child)
 
     # Loop through all children of node
     logging.info("len(node.children)=%s", len(node.children))
     for child in node.children:
         post_vars.update({"__EVENTTARGET": "__Page", "__EVENTARGUMENT": child.dir_id})
-        r = requests.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid,
+        
+		# Expand directory
+        attempts = 3
+        while attempts > 0:
+            r = requests.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid,
                 cookies = cookies, data = post_vars, verify = cafile)
-        fullname = child.dir_name.decode('cp850', 'ignore')
-        fname = r.content.split('FolderCommentsLabel">Mappenavn: ')
+            
+            if r.status_code == 200:  # Success!
+                break
+            time.sleep(5) # Wait 5 seconds before trying again.
+            attempts -= 1
+        
+        else: # We give up. Too many errors.
+            filnavn = id[i].split('&nbsp;')[1].split('</a>')[0]
+            logging.info(u"FEJL: Kunne ikke læse mappen " + child.dir_id)
+            print u"FEJL: Kunne ikke læse mappen " + child.dir_id
+            continue # Give up and skip this folder.
+        
+        content = r.content.decode(errors = 'ignore') # Convert to unicode
+        fullname = child.dir_name
+        fname = content.split('FolderCommentsLabel">Mappenavn: ')
         if len(fname) > 1:
-            fullname = fname[-1].split("\n")[0].decode('cp850', 'ignore')
-        newpath = convert(path + "/" + fullname)
-        logging.info("Reading files from {0:38} : {1:2} : {2}".format(child.dir_id, child.dir_sub, newpath))
-        readFiles(r.content, cookies, newpath)
+            fullname = fname[-1].split("\n")[0]
+        newpath = convert(path + "/" + fullname).rstrip()
+        newpath = newpath.replace(':', u"_") # On Windows, a ':' is not allowed in directory names
+        
+        logging.info(u"Reading files from {0:38} : {1:2} : {2}".format(child.dir_id, child.dir_sub, newpath))
+        readFiles(content, cookies, newpath)
         if child.dir_sub:
             readFrom = '"Collapse ' + child.dir_name.replace('&', '&amp;') + '"'
-            readRecursively(cookies, r.content, tid, child, newpath, readFrom)
+            readRecursively(cookies, content, tid, child, newpath, readFrom)
 
 
 ########################################################################################################
@@ -454,7 +510,7 @@ print u"lectio og ændre dit kodeord til en ny midlertidig kode."
 print
 
 print u"Indtast navnet på din skole:",
-skole = raw_input().rstrip().decode('utf-8', 'ignore')
+skole = raw_input().rstrip().decode('cp850', errors='ignore')
 
 navne = map(list, zip(*skoler_liste))[1] # Dette er en liste af alle skolers navne.
 
@@ -528,10 +584,10 @@ cookies = convertToDict(c)
 # Get list of documents
 r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid, \
                  cookies = cookies, verify = cafile)
-root = Node('Root', '', True)
-
+root = Node(u'Root', u'', True)
+content = r.content.decode(errors='ignore') # Convert to unicode
 t1 = time.time()
-readRecursively(cookies, r.content, tid, root, BASEDIR, 'newdocs')
+readRecursively(cookies, content, tid, root, BASEDIR, u'newdocs')
 t2 = time.time()
 
 minutter = int((t2-t1)/60) # Udregn den brugte tid i minutter
