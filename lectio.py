@@ -8,6 +8,7 @@ import difflib
 import logging
 from dateutil import parser
 from dateutil import relativedelta
+import os.path
 
 # Initialize global variables
 BASEDIR  = "Lectio-Doc" # Mappe, hvor alle de hentede dokumenter bliver lagt.
@@ -394,6 +395,12 @@ def readFiles(page, cookies, dir_name):
         s = convert(s)
 
         fname = convert(dir_name + "/" + s)
+		
+        while os.path.exists(fname):
+            logging.info("*** " + fname + " *** findes allerede")
+            idx = fname.rfind(u'.')
+            fname = fname[:idx] + u"_" + fname[idx:]
+        
         logging.info(u"Læser dokument ID %s til %s", docid, fname)
         print u"Læser document ID", docid, "til", fname
         
@@ -441,23 +448,24 @@ def convertToDict(s):
 # It will recursively descend into all sub directories.
 # "fname" is the name of the expanded folder, if any.
 # If set, only descend recursively through folders below this one.
-def readRecursively(cookies, page, tid, node, path, readFrom=""):
+def readRecursively(cookies, page, tid, node, path, readFrom):
     global lectio_nummer
     
-    logging.info(u"readRecursively, dir_name=%s", node.dir_name)
+    logging.info(u"readRecursively, dir_name=%s, readFrom=%s", node.dir_name, readFrom)
     post_vars = getHiddenValues(page)
     
-    if readFrom:  # Skip directories already processed
-        page = page.split(readFrom)[-1]
+    page = page.split(readFrom)[-1]
 
     id = page.split('lectio/img')
     logging.info("len(id)=%s", len(id))
     for i in range(1,len(id)):
         fdir = id[i].split("TREECLICKED")
+        
         if len(fdir) > 1:
             dir_id = "TREECLICKED" + fdir[1].split('&')[0]
             dir_name = fdir[1].split('">')[1].split('<')[0]
             expand = "Expand" in id[i-1]
+            
             child = Node(dir_name, dir_id, expand)
             if isChildInTree(child, root) and i == 1:
                 logging.info("Skipping %s", dir_name)
