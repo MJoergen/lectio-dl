@@ -1,0 +1,2 @@
+python lectio.py
+PAUSE
