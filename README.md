@@ -18,7 +18,7 @@ Denne version af programmet kræver, at Python 2.7 er installeret, samt modulet 
 
 # Mangler
 * Filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver p.t. ikke taget med.
-* Dokumenterne bliver gemt med dags dato. Programmet benytter ikke lectio's datoer for dokumenterne.
+* Hvis filnavne med mappesti bliver for langt, så fejler programmet. Det anbefales derfor, at gemme programmet helt i roden af harddisken, f.eks. C:\L\
 
 # Tid
 Det kan godt tage op imod en time at hente alle sine dokumenter ned, afhængig af antal og størrelse.
