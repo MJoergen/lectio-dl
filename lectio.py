@@ -10,6 +10,7 @@ from dateutil import parser
 from dateutil import relativedelta
 import os.path
 from datetime import datetime
+import md5
 
 # Initialize global variables
 BASEDIR  = "Lectio-Doc" # Mappe, hvor alle de hentede dokumenter bliver lagt.
@@ -399,7 +400,9 @@ def readFiles(page, cookies, dir_name):
             idx = fname.rfind(u'.')
             fname = fname[:idx] + u"_" + fname[idx:]
         
-        logging.info(u"Læser dokument ID %s til %s", docid, fname)
+        m = md5.new()
+        m.update(r.content)
+        logging.info(u"Læser dokument ID %s (MD5=%s) til %s", docid, m.hexdigest(), fname)
         print u"Læser document ID", docid, "til", fname
         
         f = open(fname, "wb") # On windows, we must use binary mode.
@@ -455,7 +458,9 @@ def readFiles(page, cookies, dir_name):
             idx = fname.rfind(u'.')
             fname = fname[:idx] + u"_" + fname[idx:]
         
-        logging.info(u"Læser dokument ID %s til %s", docid, fname)
+        m = md5.new()
+        m.update(r.content)
+        logging.info(u"Læser dokument ID %s (MD5=%s) til %s", docid, m.hexdigest(), fname)
         print u"Læser document ID", docid, "til", fname
         
         f = open(fname, "wb") # On windows, we must use binary mode.
