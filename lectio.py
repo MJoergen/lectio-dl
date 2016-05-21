@@ -9,6 +9,7 @@ import logging
 from dateutil import parser
 from dateutil import relativedelta
 import os.path
+from datetime import datetime
 
 # Initialize global variables
 BASEDIR  = "Lectio-Doc" # Mappe, hvor alle de hentede dokumenter bliver lagt.
@@ -355,8 +356,61 @@ def readFiles(page, cookies, dir_name):
     global lectio_nummer
     
     os.makedirs(dir_name)
-    
-    # Parse list
+
+    print u"Undersøger mappen " + dir_name
+    logging.info(u"Undersøger mappen " + dir_name)
+
+    # Parse list (files under 'Aktiviteter')
+    id = page.split('modul</td>')
+    for i in range(1,len(id)):
+        docid = id[i].split('href="')[1].split('"')[0]  # Get document link
+
+        # Read entire file, try a few times in case of errors.
+        attempts = 3
+        while attempts > 0:
+            r = requests.get('https://www.lectio.dk' +docid, \
+			    cookies = cookies, verify = cafile)
+
+            if r.status_code == 200 and 'Content-Disposition' in r.headers:  # Success!
+                break
+            time.sleep(5) # Wait 5 seconds before trying again.
+            attempts -= 1
+        
+        else: # We give up. Too many errors.
+            filnavn = id[i].split('&nbsp;')[1].split('</a>')[0]
+            logging.info(u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn)
+            print u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn
+            continue # Give up and skip this file.
+
+        # Get file name from headers, because the name in the HTML file may be truncated.
+        date_str = id[i-1].split('noWrap">')[-1].split(' ')[1]
+        date = parser.parse(date_str, dayfirst=True)
+        present = datetime.now()
+        if date > present:
+            date = date + relativedelta.relativedelta(years=-1)
+        date_int = time.mktime(date.timetuple())
+        s = r.headers['Content-Disposition'].split("UTF-8''")[-1].decode(errors='ignore')
+        s = convert(s)
+
+        fname = convert(dir_name + "/" + s)
+		
+        while os.path.exists(fname):
+            logging.info("*** " + fname + " *** findes allerede")
+            idx = fname.rfind(u'.')
+            fname = fname[:idx] + u"_" + fname[idx:]
+        
+        logging.info(u"Læser dokument ID %s til %s", docid, fname)
+        print u"Læser document ID", docid, "til", fname
+        
+        f = open(fname, "wb") # On windows, we must use binary mode.
+        f.write(r.content)
+        f.close()
+        os.utime(fname, (date_int, date_int))
+        time.sleep(0.1) # Avoid stressing the servers at lectio.
+        sumFiles += 1
+        sumBytes += len(r.content)
+
+    # Parse list (regular files)
     id = page.split('documentid=')
     for i in range(1,len(id)):
         docid = id[i].split('"')[0]  # Get document ID
@@ -367,7 +421,7 @@ def readFiles(page, cookies, dir_name):
             r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/dokumenthent.aspx?documentid='+docid, \
 			    cookies = cookies, verify = cafile)
 
-            if r.status_code == 200:  # Success!
+            if r.status_code == 200 and 'Content-Disposition' in r.headers:  # Success!
                 break
             time.sleep(5) # Wait 5 seconds before trying again.
             attempts -= 1
@@ -620,7 +674,7 @@ minutter = int((t2-t1)/60) # Udregn den brugte tid i minutter
 
 print
 print u"Færdig!"
-print u"Du har nu hentet i alle dine dokumenter ned fra lectio."
+print u"Du har nu hentet alle dine dokumenter ned fra lectio."
 print u"De ligger alle i mappen '"+BASEDIR+"'."
 print 
 print u"Lidt statistik:"
