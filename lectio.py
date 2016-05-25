@@ -355,11 +355,16 @@ def readFiles(page, cookies, dir_name):
     global sumBytes 
     global sumDirs
     global lectio_nummer
-    
-    os.makedirs(dir_name)
 
     print u"Undersøger mappen " + dir_name
     logging.info(u"Undersøger mappen " + dir_name)
+
+    try:    
+        os.makedirs(dir_name)
+    except WindowsError:
+        print u"*** Mappen kunne ikke oprettes. Alle filerne springes over."
+        logging.error(u"*** Mappen kunne ikke oprettes. Alle filerne springes over.")
+        return
 
     # Parse list (files under 'Aktiviteter')
     id = page.split('modul</td>')
@@ -379,7 +384,7 @@ def readFiles(page, cookies, dir_name):
         
         else: # We give up. Too many errors.
             filnavn = id[i].split('&nbsp;')[1].split('</a>')[0]
-            logging.info(u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn)
+            logging.error(u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn)
             print u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn
             continue # Give up and skip this file.
 
@@ -405,10 +410,14 @@ def readFiles(page, cookies, dir_name):
         logging.info(u"Læser dokument ID %s (MD5=%s) til %s", docid, m.hexdigest(), fname)
         print u"Læser document ID", docid, "til", fname
         
-        f = open(fname, "wb") # On windows, we must use binary mode.
-        f.write(r.content)
-        f.close()
-        os.utime(fname, (date_int, date_int))
+        try:
+            f = open(fname, "wb") # On windows, we must use binary mode.
+            f.write(r.content)
+            f.close()
+            os.utime(fname, (date_int, date_int))
+        except IOError:
+            print u"*** Kunne ikke gemme denne fil."
+            logging.error(u"*** Kunne ikke gemme denne fil.")
         time.sleep(0.1) # Avoid stressing the servers at lectio.
         sumFiles += 1
         sumBytes += len(r.content)
@@ -431,15 +440,15 @@ def readFiles(page, cookies, dir_name):
         
         else: # We give up. Too many errors.
             filnavn = id[i].split('&nbsp;')[1].split('</a>')[0]
-            logging.info(u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn)
+            logging.error(u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn)
             print u"FEJL: Kunne ikke læse dokument ID " + docid + ", filnavn " + filnavn
             continue # Give up and skip this file.
 
         # Get file name from headers, because the name in the HTML file may be truncated.
         date_str = id[i].split('noWrap">')[2].split('</')[0]
+        date_str = date_str.replace(u'on', u'Wed')  # Avoid repeated translation
         date_str = date_str.replace(u'ma', u'Mon')
         date_str = date_str.replace(u'ti', u'Tue')
-        date_str = date_str.replace(u'on', u'Wed')
         date_str = date_str.replace(u'to', u'Thu')
         date_str = date_str.replace(u'fr', u'Fri')
         date_str = date_str.replace(u'lø', u'Sat')
@@ -463,10 +472,14 @@ def readFiles(page, cookies, dir_name):
         logging.info(u"Læser dokument ID %s (MD5=%s) til %s", docid, m.hexdigest(), fname)
         print u"Læser document ID", docid, "til", fname
         
-        f = open(fname, "wb") # On windows, we must use binary mode.
-        f.write(r.content)
-        f.close()
-        os.utime(fname, (date_int, date_int))
+        try:
+            f = open(fname, "wb") # On windows, we must use binary mode.
+            f.write(r.content)
+            f.close()
+            os.utime(fname, (date_int, date_int))
+        except IOError:
+            print u"*** Kunne ikke gemme denne fil."
+            logging.error(u"*** Kunne ikke gemme denne fil.")
         time.sleep(0.1) # Avoid stressing the servers at lectio.
         sumFiles += 1
         sumBytes += len(r.content)
@@ -574,7 +587,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom):
 
 ########################################################################################################
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s', filename='log.txt')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='log.txt')
 
 print u"Velkommen!"
 print u"Dette lille program vil hente alle dine dokumenter fra lectio og gemme på din computer mappen '"+BASEDIR+"'."
