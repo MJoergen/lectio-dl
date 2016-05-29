@@ -1,27 +1,27 @@
-# lectio-dl
-Henter alle dine dokumenter på lectio til din computer!
+# Installation
+Lige nu findes programmet til Windows 10 med 64-bit version. Du kan hente programmet her: [lectio-dl](http://mjoergen.eu/lectio-dl.zip)
 
-# Hvad
+Så skal du pakke zip-filen ud og lægge den i roden af din harddisk (C:\lectio-dl)
+
+Så skal du dobbelt-klikke på filen **lectio-dl.exe**
+
+Du vil nu blive bedt om at indtaste din skoles navn, og derefter dit brugernavn og kodeord til lectio.
+
+# Ofte stillede spørsgsmål (FAQ)
+## Hvad er lectio-dl?
+Det er et lille program til at hente alle dine dokumenter på lectio til din computer!
+## Hvilke filer bliver hentet?
 Alle filer, som ligger under 'Dokumenter' på lectio, bliver hentet ned til din computer.
-
-# Hvorfor
-Hvis man overgår til et nyt administrationssystem, eller hvis man gerne vil have en backup.
-
-# Hvordan
-Kør programmet. Den spørger efter skolenavn, brugernavn og kodeord.
-
-# Sikkerhed
+## Hvorfor er dette program lavet?
+Fordi alle skoler skal stoppe brugen af lectio, se her: [Brev om dispensation](http://www.stil.dk/-/media/STIL/Filer/PDF16/160526-Brev-om-dispensation-til-DG-og-DEL,-d-,docx.ashx)
+## Er det sikkert?
 Dette program gør kun som beskrevet. Men hvis sikkerhed betyder meget, så bør man sørge for at ændre sit lectio-kodeord før og efter at have brugt dette program.
+## Hvor lang tid tager det?
+Det kan godt tage over en time at hente alle sine dokumenter ned, afhængig af antal og størrelse.
+## Virker programmet som lovet?
+Ja, bortset fra, at filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver ikke taget med.
 
-# Systemkrav
-Denne version af programmet kræver, at Python 2.7 er installeret, samt modulet "requests"
-
-# Mangler
-* Filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver p.t. ikke taget med.
-* Hvis filnavne med mappesti bliver for langt, så fejler programmet. Det anbefales derfor, at gemme programmet helt i roden af harddisken, f.eks. C:\L\
-
-# Tid
-Det kan godt tage op imod en time at hente alle sine dokumenter ned, afhængig af antal og størrelse.
-
-# Tekniske detaljer
-Når man henter en side fra lectio, så giver det et forskelligt resultat om man bruger en almindelig browser (Chrome, m.m.) eller om man bruger dette python script. Det har givet en del grå hår i hovedet...
+# For udviklere
+Programmet kan også køres direkte fra Python, hvis man den Python 2.7 er installeret. Følgende moduler skal så også installeres:
+* requests
+* dateutil
