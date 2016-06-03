@@ -24,6 +24,6 @@ Det kan godt tage over en time at hente alle sine dokumenter ned, afhængig af a
 Ja, bortset fra, at filer som ligger under "Opgaver", eller som er vedhæftet "Beskeder", bliver ikke taget med.
 
 # For udviklere
-Programmet kan også køres direkte fra Python, hvis man har Python 2.7 er installeret. Følgende moduler skal så også installeres:
+Programmet kan også køres direkte fra Python, hvis man har [Python 2.7](https://www.python.org/) er installeret. Følgende moduler skal så også installeres:
 * requests
 * python-dateutil
