@@ -1,5 +1,5 @@
 # Installation
-Lige nu findes programmet til Windows 10 med 64-bit version. Du kan hente programmet her (vælg den version, der passer til dit styresystem):
+Lige nu findes programmet til Windows kun. Du kan hente programmet her (vælg den version, der passer til dit styresystem):
 * [Windows 10 (64-bit)](http://mjoergen.eu/lectio-dl.zip)
 * [Windows 7 (64-bit)](http://mjoergen.eu/lectio-dl-win7-64bit.zip)
 
