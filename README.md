@@ -1,5 +1,7 @@
 # Installation
-Lige nu findes programmet til Windows 10 med 64-bit version. Du kan hente programmet her: [lectio-dl](http://mjoergen.eu/lectio-dl.zip)
+Lige nu findes programmet til Windows 10 med 64-bit version. Du kan hente programmet her (vælg den version, der passer til dit styresystem):
+* [Windows 10 (64-bit)](http://mjoergen.eu/lectio-dl.zip)
+* [Windows 7 (64-bit)](http://mjoergen.eu/lectio-dl-win7-64bit.zip)
 
 Så skal du pakke zip-filen ud og lægge den i roden af din harddisk (C:\lectio-dl)
 
@@ -24,4 +26,4 @@ Ja, bortset fra, at filer som ligger under "Opgaver", eller som er vedhæftet "B
 # For udviklere
 Programmet kan også køres direkte fra Python, hvis man har Python 2.7 er installeret. Følgende moduler skal så også installeres:
 * requests
-* dateutil
+* python-dateutil
