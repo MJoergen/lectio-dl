@@ -585,6 +585,10 @@ def readRecursively(cookies, page, tid, node, path, readFrom):
             readRecursively(cookies, content, tid, child, newpath, readFrom)
 
 
+def endProgram():
+    raw_input(u'Tryk Enter for at afslutte programmet')
+    os._exit(0)
+			
 ########################################################################################################
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='log.txt')
@@ -598,7 +602,7 @@ if os.path.isdir(BASEDIR):
     print u"Fejl!"
     print u"Der findes allerede en mappe med navnet '"+BASEDIR+"'"
     print u"Du skal først fjerne eller omdøbe denne mappe, og så genstarte dette program"
-    os._exit(1)
+    endProgram()
 
 print u"Du skal først skrive navnet på din skole og verificere dette. Dernæst vil programmet"
 print u"bede om dit brugernavn og dit kodeord til lectio. Hvis du vil, så kan du gå ind på "
@@ -615,7 +619,7 @@ if (len(skole_korr_liste) == 0):
     print u"Jeg kunne ikke finde nogen skole med det navn."
     print u"Vi stopper her."
     print u"Prøv at starte programmet forfra."
-    os._exit(1)
+    endProgram()
 
 skole_korr = skole_korr_liste[0]
 
@@ -626,7 +630,7 @@ if (skole != skole_korr):
     if (not bek[0] in ('j', 'J', 'y', 'Y')):
         print u"Ok, vi stopper her."
         print u"Prøv at starte programmet forfra."
-        os._exit(1)
+        endProgram()
 
 
 skole_index = navne.index(skole_korr)
@@ -665,7 +669,7 @@ if len(ftid) == 1:
     print u"Det er sandsynligvis fejl i brugernavn og/eller kodeord."
     print u"Vi stopper her."
     print u"Prøv at starte programmet forfra."
-    os._exit(1)
+    endProgram()
 
 tid = r.content.split('laererid=',1)[1].split('"')[0]
 print u"Jeg er nu logget ind på lectio som " + teacher + "."
