@@ -1,6 +1,6 @@
 # Installation
 Lige nu findes programmet til Windows kun. Du kan hente programmet her (vælg den version, der passer til dit styresystem):
-* [Windows 10 (64-bit)](http://mjoergen.eu/lectio-dl.zip)
+* [Windows 10 (64-bit)](http://mjoergen.eu/lectio-dl-win10-64bit.zip)
 * [Windows 7 (64-bit)](http://mjoergen.eu/lectio-dl-win7-64bit.zip)
 
 Så skal du pakke zip-filen ud og lægge den i roden af din harddisk (C:\lectio-dl)
