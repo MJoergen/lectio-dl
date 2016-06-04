@@ -586,12 +586,15 @@ def readRecursively(cookies, page, tid, node, path, readFrom):
 
 
 def endProgram():
+    print
     raw_input(u'Tryk Enter for at afslutte programmet')
+    logging.info(u"Slut program")
     os._exit(0)
 			
 ########################################################################################################
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='log.txt')
+logging.info(u"Start program version 1.0")
 
 print u"Velkommen!"
 print u"Dette lille program vil hente alle dine dokumenter fra lectio og gemme på din computer mappen '"+BASEDIR+"'."
@@ -706,4 +709,6 @@ print u"Tilsammen fylder de:", repr(sumBytes/1024/1024).rjust(4), "MB"
 print u"Tid brugt i alt:    ", repr(minutter).rjust(4), "minutter"
 print
 print u"Slut!"
+
+endProgram()
 
