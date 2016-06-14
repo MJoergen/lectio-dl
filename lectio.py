@@ -556,7 +556,7 @@ def readRecursively(cookies, page, tid, node, path, readFrom):
 		# Expand directory
         attempts = 3
         while attempts > 0:
-            r = requests.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid,
+            r = requests.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?'+tid,
                 cookies = cookies, data = post_vars, verify = cafile)
             
             if r.status_code == 200:  # Success!
@@ -667,14 +667,18 @@ r = s.post('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/login.aspx',
 
 # Get teacher ID
 ftid = r.content.split('laererid=',1)
-if len(ftid) == 1:
+fsid = r.content.split('elevid=',1)
+if len(ftid) == 1 and len(fsid) == 1:
     print u"Det var ikke muligt at logge ind."
     print u"Det er sandsynligvis fejl i brugernavn og/eller kodeord."
     print u"Vi stopper her."
     print u"Prøv at starte programmet forfra."
     endProgram()
 
-tid = r.content.split('laererid=',1)[1].split('"')[0]
+if len(ftid) > 1:
+    tid = 'laererid=' + ftid[1].split('"')[0]
+else:
+    tid = 'elevid=' + fsid[1].split('"')[0]
 print u"Jeg er nu logget ind på lectio som " + teacher + "."
 print
 
@@ -685,7 +689,7 @@ c = r.request.headers['Cookie']
 cookies = convertToDict(c)
 
 # Get list of documents
-r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?laererid='+tid, \
+r = requests.get('https://www.lectio.dk/lectio/' + str(lectio_nummer) + '/DokumentOversigt.aspx?'+tid, \
                  cookies = cookies, verify = cafile)
 root = Node(u'Root', u'', True)
 content = r.content.decode(errors='ignore') # Convert to unicode
