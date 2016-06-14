@@ -594,7 +594,7 @@ def endProgram():
 ########################################################################################################
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', filename='log.txt')
-logging.info(u"Start program version 1.0")
+logging.info(u"Start program version 2.0")
 
 print u"Velkommen!"
 print u"Dette lille program vil hente alle dine dokumenter fra lectio og gemme på din computer mappen '"+BASEDIR+"'."
