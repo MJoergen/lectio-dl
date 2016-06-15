@@ -12,6 +12,8 @@ Du vil nu blive bedt om at indtaste din skoles navn, og derefter dit brugernavn 
 # Ofte stillede spørsgsmål (FAQ)
 ## Hvad er lectio-dl?
 Det er et lille program til at hente alle dine dokumenter på lectio til din computer!
+## Hvad koster det?
+Prisen er giv-en-donation-hvis-du-er-glad-for-programmet. Det kan gøres via MobilePay til 61362938. Jeg foreslår et beløb under 50 kroner.
 ## Hvilke filer bliver hentet?
 Alle filer, som ligger under 'Dokumenter' på lectio, bliver hentet ned til din computer.
 ## Hvorfor er dette program lavet?
