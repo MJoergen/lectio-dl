@@ -17,7 +17,7 @@ Prisen er giv-en-donation-hvis-du-er-glad-for-programmet. Det kan gøres via Mob
 ## Hvilke filer bliver hentet?
 Alle filer, som ligger under 'Dokumenter' på lectio, bliver hentet ned til din computer.
 ## Hvorfor er dette program lavet?
-Fordi alle skoler skal stoppe brugen af lectio, se her: [Brev om dispensation fra STIL](http://www.stil.dk/-/media/STIL/Filer/PDF16/160526-Brev-om-dispensation-til-DG-og-DEL,-d-,docx.ashx)
+Fordi alle skoler muligvis skal stoppe brugen af lectio, se her: [Brev om dispensation fra STIL](http://www.stil.dk/-/media/STIL/Filer/PDF16/160526-Brev-om-dispensation-til-DG-og-DEL,-d-,docx.ashx)
 ## Er det sikkert?
 Dette program gør kun som beskrevet. Men hvis sikkerhed betyder meget, så bør man sørge for at ændre sit lectio-kodeord før og efter at have brugt dette program.
 ## Hvor lang tid tager det?
